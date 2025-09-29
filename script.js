@@ -6,6 +6,15 @@ let uploadedImages = [];
 const sessionId = localStorage.getItem('sessionId') || Date.now().toString();
 localStorage.setItem('sessionId', sessionId);
 
+// Dynamic API base URL - works both locally and deployed
+const API_BASE_URL = (() => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:3000';
+  }
+  // For deployed version, use same origin (no port needed for most platforms)
+  return window.location.origin;
+})();
+
 const chatForm = document.getElementById("chat-form");
 const inputBox = document.getElementById("user-input");
 const sendButton = document.getElementById("send-button");
@@ -542,7 +551,7 @@ chatForm.addEventListener("submit", async (e) => {
 
       const form = new FormData();
       form.append("image", uploadedImages[0]); // Only sending first image for now
-      const res = await fetch('http://localhost:3000/ocr', { method: 'POST', body: form });
+      const res = await fetch(`${API_BASE_URL}/ocr`, { method: 'POST', body: form });
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -565,7 +574,7 @@ chatForm.addEventListener("submit", async (e) => {
           });
         })) : [];
 
-      const response = await fetch("http://localhost:3000/chat", {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -694,7 +703,7 @@ function handleImageFile(file) {
     const formData = new FormData();
     formData.append("image", file);
     
-    fetch('http://localhost:3000/detect', { method: 'POST', body: formData })
+    fetch(`${API_BASE_URL}/detect`, { method: 'POST', body: formData })
       .then(res => {
         console.log('🔍 Detection response status:', res.status);
         if (!res.ok) {
@@ -721,7 +730,7 @@ function handleImageFile(file) {
     const ocrFormData = new FormData();
     ocrFormData.append('image', file);
     
-    fetch('http://localhost:3000/ocr-js', {
+    fetch(`${API_BASE_URL}/ocr-js`, {
       method: 'POST',
       body: ocrFormData
     })
