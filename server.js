@@ -115,21 +115,14 @@ Title:`,
       // Enhanced message with more confident image analysis instructions
       enhancedMessage = `${message}
 
-CRITICAL INSTRUCTIONS FOR IMAGE ANALYSIS:
-The user has uploaded ${images.length} image(s). You HAVE ACCESS to image analysis data through:
-1. OCR text extraction results (shown as "📝 Image Analysis - Text Content") 
-2. Object detection results (shown as "🔍 Image Analysis - Objects Detected")
+CONTEXT: The user has uploaded ${images.length} image(s) that have been processed with OCR and object detection. Based on the recent OCR and object detection results in our conversation history, you CAN analyze and discuss the image content. 
 
-YOU MUST:
-- Look at the MOST RECENT object detection results in our conversation
-- If it shows "bottle" - the image contains a bottle
-- If it shows "festival celebration" - it's a festival/celebration image  
-- If it shows "image content" - it's a general image
-- NEVER say "I cannot see images" - you CAN analyze them using the provided data
-- Be confident and direct: "Based on the object detection, I can see this is a [object]"
-- Describe what you detect based on the analysis results, don't be hesitant
-
-RESPOND CONFIDENTLY about what the analysis detected.`;
+INSTRUCTIONS: 
+- Reference the OCR text results to understand what text appears in the image
+- Reference the object detection results to understand what objects/items are in the image  
+- Combine this information to provide helpful analysis of the image content
+- You ARE able to discuss images using the extracted data - don't say you cannot see images
+- If OCR found minimal text or no objects were specifically detected, that's still valid information about the image`;
     }
 
     const chatResponse = await cohere.chat({
@@ -348,15 +341,7 @@ app.post('/detect', upload.single('image'), async (req, res) => {
       console.log('✅ Detected bottle/water');
     }
     
-    // Enhanced visual analysis - try to detect common objects
-    // Since this is a fallback, make educated guesses based on context
-    if (detectedObjects.length === 0) {
-      // Default to bottle detection for common container-like images
-      detectedObjects.push({ label: 'bottle', confidence: 0.75 });
-      console.log('✅ Fallback: Assumed bottle/container');
-    }
-    
-    // Also add a generic detection for completeness
+    // ALWAYS add a generic detection
     detectedObjects.push({ label: 'image content', confidence: 0.60 });
     console.log('✅ Added generic detection');
     
