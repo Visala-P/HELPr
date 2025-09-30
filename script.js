@@ -56,6 +56,39 @@ function initialize() {
     const sidebarToggleBtn = document.getElementById('sidebarToggle');
     if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
 
+    // Setup search functionality
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchChats();
+            }, 200); // Debounce search for chat names
+        });
+        
+        // Handle Escape key to close search
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+    }
+    
+    // Close search bar when clicking outside of it
+    document.addEventListener('click', (e) => {
+        const searchSection = document.getElementById('search-section');
+        const searchButton = document.querySelector('.sidebar-btn[onclick*="toggleSearchSection"]');
+        
+        // Check if search bar is visible
+        if (searchSection && searchSection.style.display !== 'none') {
+            // Check if click is outside search bar and not on search button
+            if (!searchSection.contains(e.target) && !searchButton?.contains(e.target)) {
+                clearSearch();
+            }
+        }
+    });
+
     // Load chats
     allChats = JSON.parse(localStorage.getItem("allChats")) || [];
     currentChatId = localStorage.getItem("currentChatId");
@@ -422,48 +455,6 @@ function clearSearch() {
 
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// Add real-time search as user types for chat names
-document.addEventListener('DOMContentLoaded', () => {
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) {
-    let searchTimeout;
-    searchInput.addEventListener('input', () => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        searchChats();
-      }, 200); // Debounce search for chat names
-    });
-    
-    // Handle Escape key to close search
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        clearSearch();
-      }
-    });
-  }
-  
-  // Close search bar when clicking outside of it
-  document.addEventListener('click', (e) => {
-    const searchSection = document.getElementById('search-section');
-    const searchButton = document.querySelector('.sidebar-btn[onclick*="toggleSearchSection"]');
-    
-    // Check if search bar is visible
-    if (searchSection && searchSection.style.display !== 'none') {
-      // Check if click is outside search bar and not on search button
-      if (!searchSection.contains(e.target) && !searchButton?.contains(e.target)) {
-        clearSearch();
-      }
-    }
-  });
-});
-
-function scrollToBottom() {
-  const chat = document.getElementById("chat-messages");
-  if (chat) {
-    chat.scrollTop = chat.scrollHeight;
-  }
 }
 
 function scrollToBottom() {
